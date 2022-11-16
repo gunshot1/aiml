@@ -1,0 +1,179 @@
+Source program
+
+from numpy import *
+import matplotlib
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np1
+
+def kernel(point,xmat, k):
+    m,n = np1.shape(xmat)
+    weights = np1.mat(np1.eye((m)))
+    for j in range(m):
+        diff = point - X[j]
+        weights[j,j] = np1.exp(diff*diff.T/(-2.0*k**2))
+    return weights
+ 
+def localWeight(point,xmat,ymat,k):
+    wei = kernel(point,xmat,k)
+    W=(X.T*(wei*X)).I*(X.T*(wei*ymat.T))
+    return W
+     
+def localWeightRegression(xmat,ymat,k):
+    m,n = np1.shape(xmat)
+    ypred = np1.zeros(m)
+    for i in range(m): 
+        ypred[i] = xmat[i]*localWeight(xmat[i],xmat,ymat,k)
+    return ypred
+       
+# load data points
+data = pd.read_csv('data10.csv')
+print(data)
+bill = np1.array(data.total_bill)
+tip = np1.array(data.tip)
+#preparing and add 1 in bill
+mbill = np1.mat(bill)
+mtip = np1.mat(tip)
+m= np1.shape(mbill)[1]
+one = np1.mat(np1.ones(m))
+X= np1.hstack((one.T,mbill.T))
+#set k here
+ypred = localWeightRegression(X,mtip,2)
+SortIndex = X[:,1].argsort(0)
+xsort = X[SortIndex][:,0]  
+fig = plt.figure()
+ax = fig.add_subplot(1,1,1)
+ax.scatter(bill,tip, color='green')
+ax.plot(xsort[:,1],ypred[SortIndex], color = 'red', linewidth=5)
+plt.xlabel('Total bill')
+plt.ylabel('Tip')
+plt.show();
+
+Input data Set data10.csv
+total_bill,tip,sex,smoker,day,time,size
+16.99,1.01,Female,No,Sun,Dinner,2
+10.34,1.66,Male,No,Sun,Dinner,3
+21.01,3.5,Male,No,Sun,Dinner,3
+23.68,3.31,Male,No,Sun,Dinner,2
+24.59,3.61,Female,No,Sun,Dinner,4
+25.29,4.71,Male,No,Sun,Dinner,4
+8.77,2,Male,No,Sun,Dinner,2
+26.88,3.12,Male,No,Sun,Dinner,4
+15.04,1.96,Male,No,Sun,Dinner,2
+14.78,3.23,Male,No,Sun,Dinner,2
+10.27,1.71,Male,No,Sun,Dinner,2
+35.26,5,Female,No,Sun,Dinner,4
+15.42,1.57,Male,No,Sun,Dinner,2
+18.43,3,Male,No,Sun,Dinner,4
+14.83,3.02,Female,No,Sun,Dinner,2
+21.58,3.92,Male,No,Sun,Dinner,2
+10.33,1.67,Female,No,Sun,Dinner,3
+16.29,3.71,Male,No,Sun,Dinner,3
+16.97,3.5,Female,No,Sun,Dinner,3
+20.65,3.35,Male,No,Sat,Dinner,3
+17.92,4.08,Male,No,Sat,Dinner,2
+20.29,2.75,Female,No,Sat,Dinner,2
+15.77,2.23,Female,No,Sat,Dinner,2
+39.42,7.58,Male,No,Sat,Dinner,4
+19.82,3.18,Male,No,Sat,Dinner,2
+17.81,2.34,Male,No,Sat,Dinner,4
+13.37,2,Male,No,Sat,Dinner,2
+12.69,2,Male,No,Sat,Dinner,2
+21.7,4.3,Male,No,Sat,Dinner,2
+19.65,3,Female,No,Sat,Dinner,2
+9.55,1.45,Male,No,Sat,Dinner,2
+18.35,2.5,Male,No,Sat,Dinner,4
+15.06,3,Female,No,Sat,Dinner,2
+20.69,2.45,Female,No,Sat,Dinner,4
+17.78,3.27,Male,No,Sat,Dinner,2
+24.06,3.6,Male,No,Sat,Dinner,3
+16.31,2,Male,No,Sat,Dinner,3
+16.93,3.07,Female,No,Sat,Dinner,3
+18.69,2.31,Male,No,Sat,Dinner,3
+31.27,5,Male,No,Sat,Dinner,3
+16.04,2.24,Male,No,Sat,Dinner,3
+17.46,2.54,Male,No,Sun,Dinner,2
+13.94,3.06,Male,No,Sun,Dinner,2
+9.68,1.32,Male,No,Sun,Dinner,2
+30.4,5.6,Male,No,Sun,Dinner,4
+18.29,3,Male,No,Sun,Dinner,2
+22.23,5,Male,No,Sun,Dinner,2
+32.4,6,Male,No,Sun,Dinner,4
+28.55,2.05,Male,No,Sun,Dinner,3
+18.04,3,Male,No,Sun,Dinner,2
+12.54,2.5,Male,No,Sun,Dinner,2
+10.29,2.6,Female,No,Sun,Dinner,2
+34.81,5.2,Female,No,Sun,Dinner,4
+9.94,1.56,Male,No,Sun,Dinner,2
+25.56,4.34,Male,No,Sun,Dinner,4
+19.49,3.51,Male,No,Sun,Dinner,2
+38.01,3,Male,Yes,Sat,Dinner,4
+26.41,1.5,Female,No,Sat,Dinner,2
+11.24,1.76,Male,Yes,Sat,Dinner,2
+
+Output:
+     total_bill   tip     sex smoker   day    time  size
+0         16.99  1.01  Female     No   Sun  Dinner     2
+1         10.34  1.66    Male     No   Sun  Dinner     3
+2         21.01  3.50    Male     No   Sun  Dinner     3
+3         23.68  3.31    Male     No   Sun  Dinner     2
+4         24.59  3.61  Female     No   Sun  Dinner     4
+5         25.29  4.71    Male     No   Sun  Dinner     4
+6          8.77  2.00    Male     No   Sun  Dinner     2
+7         26.88  3.12    Male     No   Sun  Dinner     4
+8         15.04  1.96    Male     No   Sun  Dinner     2
+9         14.78  3.23    Male     No   Sun  Dinner     2
+10        10.27  1.71    Male     No   Sun  Dinner     2
+11        35.26  5.00  Female     No   Sun  Dinner     4
+12        15.42  1.57    Male     No   Sun  Dinner     2
+13        18.43  3.00    Male     No   Sun  Dinner     4
+14        14.83  3.02  Female     No   Sun  Dinner     2
+15        21.58  3.92    Male     No   Sun  Dinner     2
+16        10.33  1.67  Female     No   Sun  Dinner     3
+17        16.29  3.71    Male     No   Sun  Dinner     3
+18        16.97  3.50  Female     No   Sun  Dinner     3
+19        20.65  3.35    Male     No   Sat  Dinner     3
+20        17.92  4.08    Male     No   Sat  Dinner     2
+21        20.29  2.75  Female     No   Sat  Dinner     2
+22        15.77  2.23  Female     No   Sat  Dinner     2
+23        39.42  7.58    Male     No   Sat  Dinner     4
+24        19.82  3.18    Male     No   Sat  Dinner     2
+25        17.81  2.34    Male     No   Sat  Dinner     4
+26        13.37  2.00    Male     No   Sat  Dinner     2
+27        12.69  2.00    Male     No   Sat  Dinner     2
+28        21.70  4.30    Male     No   Sat  Dinner     2
+29        19.65  3.00  Female     No   Sat  Dinner     2
+..          ...   ...     ...    ...   ...     ...   ...
+214       28.17  6.50  Female    Yes   Sat  Dinner     3
+215       12.90  1.10  Female    Yes   Sat  Dinner     2
+216       28.15  3.00    Male    Yes   Sat  Dinner     5
+217       11.59  1.50    Male    Yes   Sat  Dinner     2
+218        7.74  1.44    Male    Yes   Sat  Dinner     2
+219       30.14  3.09  Female    Yes   Sat  Dinner     4
+220       12.16  2.20    Male    Yes   Fri   Lunch     2
+221       13.42  3.48  Female    Yes   Fri   Lunch     2
+222        8.58  1.92    Male    Yes   Fri   Lunch     1
+223       15.98  3.00  Female     No   Fri   Lunch     3
+224       13.42  1.58    Male    Yes   Fri   Lunch     2
+225       16.27  2.50  Female    Yes   Fri   Lunch     2
+226       10.09  2.00  Female    Yes   Fri   Lunch     2
+227       20.45  3.00    Male     No   Sat  Dinner     4
+228       13.28  2.72    Male     No   Sat  Dinner     2
+229       22.12  2.88  Female    Yes   Sat  Dinner     2
+230       24.01  2.00    Male    Yes   Sat  Dinner     4
+231       15.69  3.00    Male    Yes   Sat  Dinner     3
+232       11.61  3.39    Male     No   Sat  Dinner     2
+233       10.77  1.47    Male     No   Sat  Dinner     2
+234       15.53  3.00    Male    Yes   Sat  Dinner     2
+235       10.07  1.25    Male     No   Sat  Dinner     2
+236       12.60  1.00    Male    Yes   Sat  Dinner     2
+237       32.83  1.17    Male    Yes   Sat  Dinner     2
+238       35.83  4.67  Female     No   Sat  Dinner     3
+239       29.03  5.92    Male     No   Sat  Dinner     3
+240       27.18  2.00  Female    Yes   Sat  Dinner     2
+241       22.67  2.00    Male    Yes   Sat  Dinner     2
+242       17.82  1.75    Male     No   Sat  Dinner     2
+243       18.78  3.00  Female     No  Thur  Dinner     2
+
+[244 rows x 7 columns]
+
